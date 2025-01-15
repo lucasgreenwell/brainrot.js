@@ -5,15 +5,15 @@
  * All configuration options: https://remotion.dev/docs/config
  */
 
-import { Config } from '@remotion/cli/config';
-import { enableTailwind } from '@remotion/tailwind';
+import { Config } from "@remotion/cli/config";
+import { enableTailwind } from "@remotion/tailwind";
 
-Config.setVideoImageFormat('jpeg');
+Config.setVideoImageFormat("jpeg");
 Config.setOverwriteOutput(true);
 Config.setConcurrency(8);
 // Config.setChromiumMultiProcessOnLinux(true);
 
 // This template processes the whole audio file on each thread which is heavy.
 Config.overrideWebpackConfig((currentConfiguration) => {
-	return enableTailwind(currentConfiguration);
+    return enableTailwind(currentConfiguration);
 });

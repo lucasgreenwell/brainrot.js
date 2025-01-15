@@ -1,72 +1,42 @@
-FROM python:3.9
+FROM python:3.9-slim
 
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs
-
+# Install only the required system dependencies for transcription
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ffmpeg \
-        vim \
-        ca-certificates \
-        fonts-liberation \
-        libasound2 \
-        libatk-bridge2.0-0 \
-        libatk1.0-0 \
-        libc6 \
-        libcairo2 \
-        libcups2 \
-        libdbus-1-3 \
-        libexpat1 \
-        libfontconfig1 \
-        libgbm1 \
-        libgcc1 \
-        libglib2.0-0 \
-        libgtk-3-0 \
-        libnspr4 \
-        libnss3 \
-        libpango-1.0-0 \
-        libpangocairo-1.0-0 \
-        libstdc++6 \
-        libx11-6 \
-        libx11-xcb1 \
-        libxcb1 \
-        libxcomposite1 \
-        libxcursor1 \
-        libxdamage1 \
-        libxext6 \
-        libxfixes3 \
-        libxi6 \
-        libxrandr2 \
-        libxrender1 \
-        libxss1 \
-        libxtst6 \
-        lsb-release \
-        wget \
-        xdg-utils
+        build-essential \
+        python3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip
 RUN python3 -m pip install --upgrade pip
 
-WORKDIR /app/brainrot
+# Set working directory
+WORKDIR /app/video
 
-COPY requirements.txt /app/brainrot/
-RUN cd /app/brainrot/ && pip3 install -r requirements.txt
+# Copy only the necessary Python files
+COPY requirements.txt /app/video/
+COPY setup.py /app/video/setup.py
+COPY whisper_timestamped /app/video/whisper_timestamped
 
-COPY setup.py /app/brainrot/setup.py
-COPY whisper_timestamped /app/brainrot/whisper_timestamped
+# Install Python dependencies
+RUN pip3 install -r requirements.txt && \
+    pip3 install ".[dev]" && \
+    pip3 install --no-cache-dir \
+    torch==1.13.1 \
+    torchaudio==0.13.1 \
+    --extra-index-url https://download.pytorch.org/whl/cpu && \
+    pip3 install gunicorn
 
-RUN cd /app/brainrot/ && pip3 install ".[dev]"
+# Copy only the transcription service file
+COPY transcribe.py /app/video/
 
-RUN pip3 install \
-    torch==1.13.1+cpu \
-    torchaudio==0.13.1+cpu \
-    -f https://download.pytorch.org/whl/torch_stable.html
+# Clean up unnecessary files and caches
+RUN pip cache purge && \
+    rm -rf /root/.cache/pip/*
 
-RUN pip3 install gunicorn
+# Expose the port used by Flask
+EXPOSE 5005
 
-COPY . /app/brainrot
-
-RUN npm install pm2 -g
-RUN npm install
-
-ENTRYPOINT ["gunicorn"]
-CMD ["-w", "1", "-b", "0.0.0.0:5000", "--access-logfile", "access.log", "--error-logfile", "error.log", "transcribe:app", "--daemon", "--timeout", "120"]
+# Command to run the transcription service
+CMD ["gunicorn", "--bind", "0.0.0.0:5005", "transcribe:app"]
