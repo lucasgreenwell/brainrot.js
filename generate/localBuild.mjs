@@ -51,8 +51,7 @@ async function main() {
 	const agentB = agents[1];
 
 	// CHANGE THIS VALUE FOR A CUSTOM VIDEO TOPIC
-	const videoTopic =
-		'Jordan Peterson is being eaten by a bear and joe rogan is trying to kiss the bear';
+	const videoTopic = "talk about the implication of noah solomon's war on humanity especially the havoc he is wreaking in gaza"
 	const aiGeneratedImages = true;
 	const fps = 20;
 	const duration = 1; //minute

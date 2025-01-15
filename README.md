@@ -15,7 +15,7 @@ DONALD_TRUMP_VOICE_ID=donald-trump
 GROQ_API_KEY=YOUR GROQ API KEY HERE
 OPENAI_API_KEY=YOUR OPEN AI API KEY HERE
 NEETS_API_KEY=YOUR NEETS API KEY HERE
-```
+
 
 1.5 Note, you should get the actual values for your GROQ, OPENAI, and NEETS api keys before proceeding (scroll down for links on where to get each)
 
