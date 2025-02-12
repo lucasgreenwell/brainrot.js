@@ -25,15 +25,12 @@ async function cleanupResources() {
 
 // Define valid options as enums
 export const VALID_AGENTS = [
-	'BARACK_OBAMA',
 	'BEN_SHAPIRO',
 	'JORDAN_PETERSON',
 	'JOE_ROGAN',
 	'DONALD_TRUMP',
-	'MARK_ZUCKERBERG',
 	'JOE_BIDEN',
-	'LIL_YACHTY',
-	'RICK_SANCHEZ',
+	'KAMALA_HARRIS'
 ];
 
 export const VALID_MUSIC = [

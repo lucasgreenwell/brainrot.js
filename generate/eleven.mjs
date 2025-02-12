@@ -94,8 +94,6 @@ export async function generateTranscriptAudio(
 					? process.env.JOE_BIDEN_VOICE_ID
 					: person === 'KAMALA_HARRIS'
 					? process.env.KAMALA_HARRIS_VOICE_ID
-					: person === 'ANDREW_TATE'
-					? process.env.ANDREW_TATE_VOICE_ID
 					: process.env.JORDAN_PETERSON_VOICE_ID;
 
 			await generateAudio(voice_id, person, line, i);
@@ -115,12 +113,10 @@ export async function generateTranscriptAudio(
 		const contextContent = `
 import { staticFile } from 'remotion';
 
-export const music: string = ${
-			music === 'NONE' ? `'NONE'` : `'/music/${music}.MP3'`
-		};
+export const music: string = ${music === 'NONE' ? `'NONE'` : `'/music/${music}.MP3'`};
 export const fps = ${fps};
 export const initialAgentName = '${initialAgentName}';
-export const videoFileName = '/background/MINECRAFT-0.mp4';
+export const videoFileName = \`/background/${background ? background : 'MINECRAFT'}-0.mp4\`;
 
 
 export const subtitlesFileName = [
