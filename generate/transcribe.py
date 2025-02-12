@@ -13,6 +13,14 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+@app.route('/ping', methods=['GET'])
+def ping():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat()
+    })
+
 @app.route('/transcribe', methods=['POST'])
 def transcribe_audio():
     res = []
