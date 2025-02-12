@@ -68,5 +68,7 @@ COPY . /app/brainrot
 RUN npm install pm2 -g
 RUN npm install
 
+EXPOSE 5000
+
 ENTRYPOINT ["gunicorn"]
-CMD ["-w", "1", "-b", "0.0.0.0:5000", "--access-logfile", "access.log", "--error-logfile", "error.log", "transcribe:app", "--daemon", "--timeout", "120"]
+CMD ["-w", "1", "-b", "0.0.0.0:5000", "--access-logfile", "access.log", "--error-logfile", "error.log", "--chdir", "/app/brainrot", "transcribe:app", "--timeout", "120"]

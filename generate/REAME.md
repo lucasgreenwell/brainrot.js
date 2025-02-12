@@ -57,3 +57,37 @@ I have removed assets for download except MINECRAFT-0.mp4 (in generate/public/ba
 
 - Dalle 3 API rate limit exceeded: this is because each dialogue transition has an image, and it is prompted to have 7 dialogue transitions. However, typical tier 1 open ai accounts can only generate 5 images per minute. You might need to reduce the # of dialog transitions if this is the case (in generate/transcript.mjs)
 - You don't have enough storage (the image will be around 12.6GB)
+
+## API Usage
+
+The application now exposes a REST API for video generation. After starting the Docker container, you can interact with it via HTTP requests.
+
+### Starting the API Server
+
+1. Build the Docker image:
+```bash
+docker build --platform linux/amd64 -t brainrot .
+```
+
+2. Run the container:
+```bash
+docker run -d -p 5000:5000 --name brainrot brainrot
+```
+
+### Generating Videos via API
+
+Send a POST request to the `/generate-video` endpoint:
+
+```bash
+curl -X POST http://localhost:5000/generate-video \
+  -H "Content-Type: application/json" \
+  -d '{
+    "videoTopic": "Discussing the importance of exercise",
+    "agentA": "JOE_ROGAN",
+    "agentB": "JORDAN_PETERSON",
+    "music": "WII_SHOP_CHANNEL_TRAP",
+    "background": "MINECRAFT"
+  }'
+```
+
+For full API documentation, see [API.md](API.md).

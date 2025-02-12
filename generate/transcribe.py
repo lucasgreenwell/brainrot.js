@@ -4,6 +4,8 @@ import whisper_timestamped as whisper
 import json
 import os
 import logging
+import subprocess
+from datetime import datetime
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -59,3 +61,75 @@ def transcribe_audio():
         return jsonify(res)
     except Exception as e:
         logger.error(f"Global error in transcription: {str(e)}", exc_info=True)
+
+@app.route('/generate-video', methods=['POST'])
+def generate_video():
+    try:
+        data = request.json
+        logger.info(f"Received video generation request: {data}")
+
+        required_fields = ['videoTopic', 'agentA', 'agentB', 'music', 'background']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f"Missing required field: {field}"}), 400
+
+        # Execute the Node.js script with the provided parameters
+        # Create a temporary JS file to run the generation
+        temp_js = """
+import { generateVideo } from './localBuild.mjs';
+
+const params = {
+    videoTopic: process.env.VIDEO_TOPIC,
+    agentA: process.env.AGENT_A,
+    agentB: process.env.AGENT_B,
+    music: process.env.MUSIC,
+    background: process.env.BACKGROUND,
+    aiGeneratedImages: process.env.AI_GENERATED_IMAGES === 'true',
+    fps: parseInt(process.env.FPS || '20'),
+    duration: parseInt(process.env.DURATION || '1'),
+    cleanSrt: process.env.CLEAN_SRT === 'true',
+    local: true
+};
+
+generateVideo(params).catch(console.error);
+"""
+        with open('temp_generate.mjs', 'w') as f:
+            f.write(temp_js)
+
+        # Prepare environment variables
+        env = os.environ.copy()
+        env.update({
+            'VIDEO_TOPIC': data['videoTopic'],
+            'AGENT_A': data['agentA'],
+            'AGENT_B': data['agentB'],
+            'MUSIC': data['music'],
+            'BACKGROUND': data['background'],
+            'AI_GENERATED_IMAGES': str(data.get('aiGeneratedImages', True)).lower(),
+            'FPS': str(data.get('fps', 20)),
+            'DURATION': str(data.get('duration', 1)),
+            'CLEAN_SRT': str(data.get('cleanSrt', True)).lower()
+        })
+
+        # Execute the Node.js script
+        process = subprocess.Popen(
+            ['node', 'temp_generate.mjs'],
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
+        # Return immediately with a job ID (in this case, just using timestamp)
+        job_id = datetime.now().strftime('%Y%m%d%H%M%S')
+        
+        return jsonify({
+            'status': 'processing',
+            'job_id': job_id,
+            'message': 'Video generation started. The process will continue in the background.'
+        })
+
+    except Exception as e:
+        logger.error(f"Error in video generation: {str(e)}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

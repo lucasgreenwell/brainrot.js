@@ -23,47 +23,90 @@ async function cleanupResources() {
 	}
 }
 
-const agents = [
-	// 'BARACK_OBAMA',
-	// 'BEN_SHAPIRO',
+// Define valid options as enums
+export const VALID_AGENTS = [
+	'BARACK_OBAMA',
+	'BEN_SHAPIRO',
 	'JORDAN_PETERSON',
 	'JOE_ROGAN',
-	// 'DONALD_TRUMP',
-	// 'MARK_ZUCKERBERG',
-	// 'JOE_BIDEN',
-	// 'LIL_YACHTY',
-	// 'RICK_SANCHEZ',
+	'DONALD_TRUMP',
+	'MARK_ZUCKERBERG',
+	'JOE_BIDEN',
+	'LIL_YACHTY',
+	'RICK_SANCHEZ',
 ];
 
-const local = true;
+export const VALID_MUSIC = [
+	'WII_SHOP_CHANNEL_TRAP',
+	'FLUFFING_A_DUCK',
+	'MONKEYS_SPINNING_MONKEYS',
+];
 
-async function main() {
-	const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-	let agentAIndex = Math.floor(Math.random() * agents.length);
-	let agentBIndex;
+export const VALID_BACKGROUNDS = ['MINECRAFT', 'SUBWAY'];
 
-	do {
-		agentBIndex = Math.floor(Math.random() * agents.length);
-	} while (agentAIndex === agentBIndex);
+/**
+ * Validates the input parameters for video generation
+ * @param {Object} params - The input parameters
+ * @returns {Object} - Object containing validation result and error message if any
+ */
+export function validateParams(params) {
+	const { agentA, agentB, music, background } = params;
 
-	// CHANGE THIS VALUE FOR YOUR CHOICE OF AGENTS
-	const agentA = agents[0];
-	const agentB = agents[1];
+	if (!VALID_AGENTS.includes(agentA)) {
+		return { isValid: false, error: `Invalid agentA. Must be one of: ${VALID_AGENTS.join(', ')}` };
+	}
 
-	// CHANGE THIS VALUE FOR A CUSTOM VIDEO TOPIC
-	const videoTopic =
-		'Jordan Peterson is being eaten by a bear and joe rogan is trying to kiss the bear';
-	const aiGeneratedImages = true;
-	const fps = 20;
-	const duration = 1; //minute
-	//MINECRAFT or TRUCK or GTA
-	const background = 'MINECRAFT';
-	const music = 'WII_SHOP_CHANNEL_TRAP';
-	const cleanSrt = true;
+	if (!VALID_AGENTS.includes(agentB)) {
+		return { isValid: false, error: `Invalid agentB. Must be one of: ${VALID_AGENTS.join(', ')}` };
+	}
+
+	if (agentA === agentB) {
+		return { isValid: false, error: 'agentA and agentB must be different' };
+	}
+
+	if (!VALID_MUSIC.includes(music)) {
+		return { isValid: false, error: `Invalid music. Must be one of: ${VALID_MUSIC.join(', ')}` };
+	}
+
+	if (!VALID_BACKGROUNDS.includes(background)) {
+		return { isValid: false, error: `Invalid background. Must be one of: ${VALID_BACKGROUNDS.join(', ')}` };
+	}
+
+	return { isValid: true };
+}
+
+/**
+ * Generates a video with the specified parameters
+ * @param {Object} params - The input parameters
+ * @param {string} params.videoTopic - Free-form string for video topic
+ * @param {string} params.agentA - First agent name
+ * @param {string} params.agentB - Second agent name
+ * @param {string} params.music - Background music selection
+ * @param {string} params.background - Background video selection
+ * @returns {Promise<void>}
+ */
+export async function generateVideo(params) {
+	const {
+		videoTopic,
+		agentA,
+		agentB,
+		music,
+		background,
+		aiGeneratedImages = true,
+		fps = 20,
+		duration = 1, // minute
+		cleanSrt = true,
+		local = true,
+	} = params;
+
+	const validation = validateParams(params);
+	if (!validation.isValid) {
+		throw new Error(validation.error);
+	}
 
 	await transcribeFunction(
 		local,
-		videoTopic ? videoTopic : randomTopic,
+		videoTopic,
 		agentA,
 		agentB,
 		aiGeneratedImages,
@@ -74,7 +117,6 @@ async function main() {
 		cleanSrt,
 	);
 
-	// run in the command line `npm run build`
 	exec('npm run build', async (error, stdout, stderr) => {
 		if (error) {
 			console.error(`exec error: ${error}`);
@@ -83,10 +125,15 @@ async function main() {
 		console.log(`stdout: ${stdout}`);
 		console.error(`stderr: ${stderr}`);
 
-		cleanupResources();
+		await cleanupResources();
 	});
 }
 
-(async () => {
-	await main();
-})();
+// Example usage (can be removed when integrating with API):
+// generateVideo({
+//     videoTopic: "Discussing the importance of exercise",
+//     agentA: "JOE_ROGAN",
+//     agentB: "JORDAN_PETERSON",
+//     music: "WII_SHOP_CHANNEL_TRAP",
+//     background: "MINECRAFT"
+// });
