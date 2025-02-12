@@ -1,0 +1,177 @@
+---
+description: General Flutter principles for our codebase
+globs: *.dart, *fire*
+---
+## 1. General Principles
+
+- **Language & Clarity**:  
+  - Write all code and documentation in English.
+  - Document complex logic and non-obvious decisions.
+
+- **Code Quality**:  
+  - Keep functions and classes small with a single responsibility.
+  - Write concise, technical Dart code with accurate examples.
+  - Prefer composition over inheritance.
+  - Structure files logically (e.g., exported widget, subwidgets, helpers, static content, types).
+
+- **Consistency & Formatting**:  
+  - Use trailing commas for better formatting and diff readability.
+  - Keep lines no longer than 80 characters when possible.
+  - Use proper logging (e.g., use `log` instead of `print` for debugging).
+
+---
+
+## 2. Dart Specific Guidelines
+
+### 2.1. Type Safety and Declarations
+
+- **Type Declarations**:  
+  - Always declare the type of each variable and function parameter/return.
+  - Avoid using `any`—define custom types as necessary.
+
+- **Immutability**:  
+  - Prefer immutability. Use `const` for literals that do not change and immutable widgets where possible.
+  - Leverage Freezed for immutable state classes and unions.
+
+### 2.2. Naming Conventions
+
+- **Classes and Files**:  
+  - Use **PascalCase** for class names.
+  - Use **camelCase** for variables, functions, and methods.
+  - Use **underscore_case** for file and directory names.
+  - Use **UPPERCASE** for environment variables and constants.
+
+- **Functions and Methods**:  
+  - Start function names with a verb (e.g., `startProcess`, `saveData`).
+  - If returning a boolean, use naming patterns like `isLoading`, `hasError`, or `canDelete`.
+  - Use complete words instead of abbreviations (except for standard or well-known ones like API, URL, i, j, etc.).
+
+### 2.3. Functions and Methods
+
+- **Simplicity**:  
+  - Write short functions (preferably with fewer than 20 instructions).
+  - Use arrow functions for simple functions (less than three instructions).
+  - Prefer expression bodies for one-line getters and setters.
+
+- **Parameters and Abstraction**:  
+  - Use default parameter values to avoid null-checks.
+  - When a function has many parameters, pass a single object with defined types for clarity.
+  - Avoid deep nesting by using early returns or extracting utility functions.
+
+### 2.4. Data Management
+
+- **Primitive Types**:  
+  - Avoid overusing primitive types; encapsulate related data into composite types.
+  - Prefer immutability; use `readonly` where applicable.
+
+- **Validation**:  
+  - Avoid inline data validation in functions—encapsulate validation within classes or dedicated methods.
+
+### 2.5. Error Handling and Logging
+
+- **Error Handling**:  
+  - Use exceptions for unexpected errors.
+  - Catch exceptions only to fix expected issues, add context, or delegate to a global handler.
+  - In views, handle errors by displaying detailed messages (for example, using `SelectableText.rich` with red styling) rather than only transient SnackBars.
+
+- **Logging**:  
+  - Use structured logging (e.g., `log`) and consider using tools like `BlocObserver` for monitoring state transitions.
+
+---
+
+## 3. Flutter-Specific Guidelines
+
+### 3.1. Architecture and Organization
+
+- **Clean Architecture**:  
+  - Organize code into modules such as controllers, services, repositories, and entities.
+  - Follow the repository pattern for data persistence (with caching as needed).
+  - Use controller patterns (for example, with Riverpod) for business logic.
+
+- **Navigation**:  
+  - Use `AutoRoute` or `GoRouter` for managing navigation and deep linking.
+
+### 3.2. Widget Best Practices
+
+- **Widget Structure**:  
+  - Favor stateless widgets and break down complex widgets into smaller, reusable components.
+  - Avoid deeply nested widget trees. Flatten widget hierarchies to improve readability, maintainability, and performance.
+  - Create small, private widget classes rather than large widget-building methods.
+
+- **Performance Optimizations**:  
+  - Use `const` constructors wherever possible to reduce rebuilds.
+  - Use optimizations like `ListView.builder` for large or dynamic lists.
+  - Use `AssetImage` for static images and packages like `cached_network_image` for remote images.
+
+### 3.3. UI and Styling
+
+- **Responsive Design**:  
+  - Implement responsive layouts using `LayoutBuilder` or `MediaQuery`.
+  - Use themes (e.g., `ThemeData` and `Theme.of(context).textTheme`) to maintain consistent styling.
+  - Follow updated text style conventions (e.g., `titleLarge` instead of deprecated styles).
+
+- **Error and Loading States in UI**:  
+  - Manage errors and loading states within Cubit or Bloc states.
+  - Display errors clearly on screen (for example, using `SelectableText.rich` with red color for visibility).
+  - Provide UI feedback for empty states within the display screens.
+
+---
+
+## 4. Bloc, Cubit, and Freezed Guidelines
+
+### 4.1. State Management
+
+- **Bloc vs. Cubit**:  
+  - Use **Cubit** for simple state management.
+  - Use **Bloc** for complex, event-driven state management.
+
+- **Naming and Structure**:  
+  - Use descriptive and meaningful names for events, states, and methods.
+  - Structure Bloc/Cubit states using Freezed for immutability.
+  - Handle state transitions and side effects (e.g., navigation, dialog displays) inside Bloc’s event handlers or Cubit methods.
+  - Access Bloc/Cubit states in widgets using context extensions such as `context.watch()` or `context.read()`.
+
+- **Testing and Observability**:  
+  - Utilize `BlocObserver` for monitoring state transitions during debugging.
+  - Write unit tests following the Arrange-Act-Assert pattern.
+
+---
+
+## 5. Firebase Integration Guidelines
+
+- **Authentication & Database**:  
+  - Use Firebase Authentication for user sign-in, sign-up, and password management.
+  - Integrate Firestore for real-time database interactions. Structure and normalize your data.
+  - Implement Firebase Storage for handling file uploads and downloads, with proper error handling and logging.
+  - Include common fields in Firestore documents (e.g., `createdAt`, `updatedAt`, `isDeleted`).
+
+- **Error Handling & Security**:  
+  - Handle Firebase exceptions with detailed error messages.
+  - Secure Firestore and Storage with rules based on user roles and permissions.
+
+- **Performance**:  
+  - Optimize Firebase queries using indexes and query limits.
+  - Track app performance and user behavior using Firebase Analytics.
+
+---
+
+## 6. Code Generation and Testing
+
+### 6.1. Code Generation
+
+- **Annotations & Build Runner**:  
+  - Utilize `build_runner` for code generation tasks (e.g., Freezed, JSON serialization).
+  - Run commands like `flutter pub run build_runner build --delete-conflicting-outputs` after making changes to annotated classes.
+
+### 6.2. Testing Strategies
+
+- **Unit Testing**:  
+  - Write unit tests for each public function and method.
+  - Follow the Arrange-Act-Assert convention.
+  - Use test doubles to simulate dependencies, except when using lightweight third-party integrations.
+
+- **Widget and Integration Testing**:  
+  - Use Flutter’s widget testing framework for UI components.
+  - Write integration tests for API modules and Firebase interactions.
+  - For testing state management, simulate state changes using Bloc/Cubit test utilities.
+

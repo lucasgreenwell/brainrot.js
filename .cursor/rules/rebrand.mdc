@@ -1,0 +1,13 @@
+---
+description: List of names that were changed during the rebrand and may be used by the user. 
+globs: 
+---
+During a recent rebranc we changed the UI names of many of our pages without making substantial changes to the code. Below is a mapping of those rebaranded terms in case the user uses these. 
+
+The Teachin Time tab is the [upload_video_page.dart](mdc:lib/pages/upload_video_page.dart). 
+
+The Lesson Lane page is the [video_feed_widget.dart](mdc:lib/widgets/video_feed/video_feed_widget.dart) displayed on the [main.dart](mdc:lib/main.dart) home page. 
+
+The Dig Deep page is the [favorites_tab.dart](mdc:lib/widgets/profile/favorites_tab.dart). 
+
+The My Corner page is the [profile_page.dart](mdc:lib/profile_page.dart)

@@ -1,0 +1,182 @@
+---
+description: General Firebase rules for our codebase
+globs: *.dart
+---
+## 1. General Principles
+
+- **Consistent Integration**:  
+  - Use Firebase’s official SDKs and follow the latest Firebase documentation.
+  - Keep Firebase-related configurations, keys, and constants centralized and environment-specific.
+
+- **Modularity and Scalability**:  
+  - Encapsulate Firebase interactions within dedicated modules or services.
+  - Use dependency injection to manage Firebase services, ensuring testability and separation of concerns.
+
+- **Documentation and Code Quality**:  
+  - Document complex Firebase logic and non-obvious decisions.
+  - Follow Dart and Flutter style guidelines (e.g., clear variable names, single responsibility for functions).
+
+- **Performance and Security**:  
+  - Optimize Firebase queries, manage indexing, and limit data transfers.
+  - Secure your Firebase access with robust rules and best practices for authentication and authorization.
+
+### 1.1 Timestamp Handling Rule
+
+- **Best Practice for Timestamps**:
+  - **Do**: Always use `FieldValue.serverTimestamp()` when generating timestamps for Firestore documents. This ensures that the timestamp is generated on the server, providing a consistent and accurate time reference that aligns with Firestore's security rules.
+  - **Never**: Use `DateTime.now()` for timestamps that are stored in Firestore. Client-generated timestamps can lead to discrepancies due to differences in client and server time, potentially causing security rule violations and inconsistent data.
+
+- **Implementation Details**:
+  - When creating or updating documents in Firestore, set the timestamp fields using `FieldValue.serverTimestamp()`.
+  - Ensure that your data models can handle nullable timestamps, as the server timestamp will initially be `null` until the server processes the request.
+
+- **Security Considerations**:
+  - Validate timestamps in Firestore security rules using server-generated timestamps to prevent unauthorized access or modifications based on client-side time manipulation.
+
+- **Error Handling**:
+  - Implement error handling to manage cases where timestamps are unexpectedly `null` or when Firestore operations fail due to timestamp-related issues.
+  
+
+---
+
+## 2. Firebase Authentication
+
+- **User Management**:  
+  - Use Firebase Authentication for user sign-in, sign-up, and password management.
+  - Implement proper error handling to catch and display authentication errors.
+
+- **Security Best Practices**:  
+  - Validate and sanitize all user inputs before sending them to Firebase.
+  - Use multi-factor authentication where appropriate.
+  - Avoid storing sensitive user data on the client side; retrieve it securely when needed.
+
+- **State Management**:  
+  - Integrate authentication state changes with your state management solution (e.g., Bloc, Cubit, or Riverpod) to trigger UI updates seamlessly.
+
+---
+
+## 3. Cloud Firestore
+
+- **Data Modeling and Structure**:  
+  - Structure your data to be normalized and consistent. Include common fields such as `createdAt`, `updatedAt`, and `isDeleted` where relevant.
+  - Use subcollections or separate collections to logically partition data.
+
+- **Query Optimization**:  
+  - Use indexes for efficient querying. Regularly review your Firestore indexes to optimize performance.
+  - Limit the number of documents returned in queries using pagination or query constraints.
+
+- **Data Security**:  
+  - Secure your Firestore database using detailed security rules based on user roles and permissions.
+  - Validate data on the server-side using Firestore rules to prevent unauthorized access or modifications.
+
+- **Error Handling**:  
+  - Implement robust error handling for Firestore operations, providing clear error messages and logging details for debugging.
+
+---
+
+## 4. Firebase Storage
+
+- **File Handling**:  
+  - Use Firebase Storage for file uploads and downloads. Ensure files are stored in well-organized directories.
+  - Provide proper error handling when interacting with Storage (e.g., using try-catch blocks to capture upload/download failures).
+
+- **Security and Access Control**:  
+  - Define clear access rules in Firebase Storage security settings, ensuring that only authorized users can read or write files.
+  - Use signed URLs or token-based access for temporary file access when needed.
+
+- **Performance Optimization**:  
+  - Optimize image and file delivery by leveraging caching mechanisms and using appropriate image formats.
+  - Monitor file sizes and optimize uploads to reduce bandwidth usage and improve load times.
+
+---
+
+## 5. Firebase Analytics
+
+- **Tracking and Reporting**:  
+  - Use Firebase Analytics to track user behavior and app performance. Define meaningful event names that reflect user actions.
+  - Follow a consistent naming convention for events and parameters.
+
+- **Performance Monitoring**:  
+  - Integrate Firebase Performance Monitoring to capture metrics related to app performance, network latency, and error rates.
+  - Regularly review analytics data to inform performance optimizations and feature improvements.
+
+- **User Privacy**:  
+  - Ensure compliance with data protection regulations (e.g., GDPR, CCPA) by anonymizing user data where required.
+  - Provide users with clear information on data collection and usage.
+
+---
+
+## 6. Error Handling and Logging
+
+- **Comprehensive Error Reporting**:  
+  - Capture and log Firebase-related errors using structured logging. Provide detailed error messages to aid in debugging.
+  - Integrate error reporting services (e.g., Firebase Crashlytics) to monitor and analyze crashes or unexpected behaviors in production.
+
+- **User Feedback**:  
+  - Display clear and user-friendly error messages. For UI views, consider using components like `SelectableText.rich` with red styling to highlight errors.
+  - Implement fallback UI for scenarios where Firebase services are unavailable or slow to respond.
+
+---
+
+## 7. Security and Access Rules
+
+- **Firebase Security Rules**:  
+  - Define comprehensive security rules for Firestore and Storage based on user roles and authentication state.
+  - Regularly audit and update security rules to address new security challenges and ensure data integrity.
+
+- **Environment Management**:  
+  - Use environment variables and secure configurations to manage Firebase keys and sensitive data.  
+  - Avoid hard-coding any sensitive information in the codebase.
+
+---
+
+## 8. Performance Optimization
+
+- **Efficient Data Queries**:  
+  - Optimize queries by fetching only the necessary data and using pagination to handle large datasets.
+  - Leverage Firebase indexes to speed up query execution.
+
+- **Caching Strategies**:  
+  - Implement caching where appropriate (e.g., caching query results or images) to reduce redundant network calls.
+  - Use local persistence features provided by Firestore for offline support.
+
+- **Monitoring and Metrics**:  
+  - Regularly review performance metrics provided by Firebase Performance Monitoring and Analytics.
+  - Adjust your data fetching and caching strategies based on observed performance trends.
+
+---
+
+## 9. Code Generation and Deployment
+
+- **Code Generation Tools**:  
+  - Use `build_runner` and related packages for generating code (e.g., JSON serialization with `json_serializable`, immutable models with Freezed).
+  - Run code generation commands (e.g., `flutter pub run build_runner build --delete-conflicting-outputs`) after updating annotated classes.
+
+- **Deployment Practices**:  
+  - Automate Firebase deployment tasks with CI/CD pipelines.
+  - Validate Firebase configurations in staging environments before deploying to production.
+
+---
+
+## 10. Testing Strategies
+
+- **Unit and Integration Testing**:  
+  - Write unit tests for Firebase service wrappers and utilities.
+  - Use integration tests to verify that Firebase interactions (e.g., Authentication flows, Firestore queries) work as expected.
+  - Use dependency injection and mocks to simulate Firebase services during tests.
+
+- **UI and Error State Testing**:  
+  - Test UI components to ensure that loading, error, and empty states are handled gracefully.
+  - Verify that error messages and fallback mechanisms are displayed correctly in case of Firebase service failures.
+
+---
+
+## 11. Documentation and Maintenance
+
+- **Code Comments and Documentation**:  
+  - Document Firebase integration logic, including complex queries, security rules, and error handling.
+  - Keep configuration and setup guides updated as Firebase services evolve.
+
+- **Regular Reviews**:  
+  - Periodically review Firebase configurations, security rules, and performance metrics.
+  - Update best practices in line with Firebase’s new features and recommended approaches.

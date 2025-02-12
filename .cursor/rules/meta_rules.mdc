@@ -1,0 +1,13 @@
+---
+description: These rules are ALWAYS vital.
+globs: *
+---
+Be sure to plan your implementation according [checklists.mdc](mdc:.cursor/rules/checklists.mdc) and document your changes according to [docs.mdc](mdc:.cursor/rules/docs.mdc)  . Ensure as well that you're following all the best practices in [flutter.mdc](mdc:.cursor/rules/flutter.mdc) and [firebase.mdc](mdc:.cursor/rules/firebase.mdc) If there are any packages that need to be installed, ensure that you're checking the latest version according to [packages.mdc](mdc:.cursor/rules/packages.mdc) . Anytime that the user responds with logs or follow up requests, be sure to follow the guidelines in [revisions.mdc](mdc:.cursor/rules/revisions.mdc). 
+
+
+Anything that can be handled via cli, you should handle directly. Our project is called tiktok-clone-69420 and we're already logged into the firebase cli. Anything that needs to be handled through a gui, you should provide detailed instructions to me and I'll handle directly. Anytime that you change rulesets such as [firestore.rules](mdc:firestore.rules) or [storage.rules](mdc:storage.rules) you should deploy them directly with a `firebase deploy --only <thing to deply>` command. 
+
+Whenever the user requests that you deploy the app, you should use the [distribute_android.sh](mdc:scripts/distribute_android.sh)
+
+
+The app recently underwent a rebrand to make it child friendly and educationally focused. When a user uses terms that are not recognized throughout the codebase, you should check what they map to in the [rebrand.mdc](mdc:.cursor/rules/rebrand.mdc)

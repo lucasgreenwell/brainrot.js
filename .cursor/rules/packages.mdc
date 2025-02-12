@@ -1,0 +1,8 @@
+---
+description: Always find the latest version of a package before adding to pubspec
+globs: *.yaml, *.json
+---
+
+# You should always find the latest version of a package before adding it to pubspec.yaml
+
+Use the brave MCP tool to check the latest version of a dart package every time before adding it to pubspec.yaml. 
