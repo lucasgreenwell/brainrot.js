@@ -6,6 +6,7 @@ import os
 import logging
 import subprocess
 from datetime import datetime
+import threading
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -99,7 +100,12 @@ const params = {
     local: true
 };
 
-generateVideo(params).catch(console.error);
+generateVideo(params)
+    .then(() => console.log('Video generation completed'))
+    .catch(error => {
+        console.error('Error generating video:', error);
+        process.exit(1);
+    });
 """
         with open('temp_generate.mjs', 'w') as f:
             f.write(temp_js)
@@ -118,17 +124,32 @@ generateVideo(params).catch(console.error);
             'CLEAN_SRT': str(data.get('cleanSrt', True)).lower()
         })
 
-        # Execute the Node.js script
+        # Execute the Node.js script and capture output in real-time
         process = subprocess.Popen(
             ['node', 'temp_generate.mjs'],
             env=env,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
         )
+
+        # Create thread to read and log stdout
+        def log_output(pipe, prefix):
+            for line in pipe:
+                logger.info(f"{prefix}: {line.strip()}")
+
+        # Start threads to handle stdout and stderr
+        stdout_thread = threading.Thread(target=log_output, args=(process.stdout, "Node.js stdout"))
+        stderr_thread = threading.Thread(target=log_output, args=(process.stderr, "Node.js stderr"))
+        stdout_thread.daemon = True
+        stderr_thread.daemon = True
+        stdout_thread.start()
+        stderr_thread.start()
 
         # Return immediately with a job ID (in this case, just using timestamp)
         job_id = datetime.now().strftime('%Y%m%d%H%M%S')
-        
         return jsonify({
             'status': 'processing',
             'job_id': job_id,
@@ -136,7 +157,7 @@ generateVideo(params).catch(console.error);
         })
 
     except Exception as e:
-        logger.error(f"Error in video generation: {str(e)}", exc_info=True)
+        logger.error(f"Error in generate_video: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

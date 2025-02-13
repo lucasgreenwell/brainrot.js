@@ -2,7 +2,7 @@ import transcribeFunction from './transcribe.mjs';
 import path from 'path';
 import { exec } from 'child_process';
 import { topics } from './topics.mjs';
-import { rm, mkdir, unlink } from 'fs/promises';
+import { rm, mkdir, unlink, readFile } from 'fs/promises';
 
 export const PROCESS_ID = 0;
 
@@ -117,15 +117,43 @@ export async function generateVideo(params) {
 		cleanSrt,
 	);
 
-	exec('npm run build', async (error, stdout, stderr) => {
-		if (error) {
-			console.error(`exec error: ${error}`);
-			return;
-		}
-		console.log(`stdout: ${stdout}`);
-		console.error(`stderr: ${stderr}`);
+	return new Promise((resolve, reject) => {
+		exec('npm run build', async (error, stdout, stderr) => {
+			if (error) {
+				console.error(`exec error: ${error}`);
+				reject(error);
+				return;
+			}
+			console.log(`stdout: ${stdout}`);
+			console.error(`stderr: ${stderr}`);
 
-		await cleanupResources();
+			try {
+				// Upload to Firebase Storage via REST API
+				const videoData = await readFile('out/video.mp4');
+				const fileName = `${Date.now()}-${videoTopic.replace(/[^a-zA-Z0-9-]/g, '-')}.mp4`;
+				const url = `https://firebasestorage.googleapis.com/v0/b/tiktok-clone-69420.firebasestorage.app/o?uploadType=media&name=public-brainrot/${encodeURIComponent(fileName)}`;
+				
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'video/mp4'
+					},
+					body: videoData
+				});
+
+				if (!response.ok) {
+					const errorText = await response.text();
+					throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
+				}
+
+				console.log('Video uploaded to Firebase Storage');
+				await cleanupResources();
+				resolve();
+			} catch (err) {
+				console.error('Error uploading to Firebase:', err);
+				reject(err);
+			}
+		});
 	});
 }
 
