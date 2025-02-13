@@ -292,7 +292,7 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								}
 								onError={(e) => {
 									/*@ts-ignore */
-									e.target.onerror = null; // Prevent looping if the fallback also fails
+									e.target.onerror = null;
 									/*@ts-ignore */
 									e.target.src = '/black.png';
 								}}
@@ -308,7 +308,6 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 										`/${currentAgentName || initialAgentName}.png`
 									)}
 								/>
-
 								<div>
 									<AudioViz
 										audioSrc={audioFileName}
@@ -330,16 +329,6 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 								src={staticFile(videoFileName)}
 							/>
 							<div
-								className="absolute flex flex-col items-center gap-2 opacity-[65%] z-30 bottom-12 right-12 text-white font-bold text-7xl"
-								style={{
-									textShadow: '4px 4px 0px #000000',
-									WebkitTextStroke: '2px black',
-								}}
-							>
-								brainrotjs
-								<br></br>.com 🧠
-							</div>
-							<div
 								style={{
 									lineHeight: `${subtitlesLineHeight}px`,
 									textShadow: '4px 4px 0px #000000',
@@ -358,14 +347,6 @@ export const AudiogramComposition: React.FC<AudiogramCompositionSchemaType> = ({
 							</div>
 						</div>
 					</div>
-				</Sequence>
-				<Sequence from={durationInFrames - 3 * fps}>
-					<OffthreadVideo
-						startFrom={20}
-						muted
-						className={`absolute -left-[1px] -top-[1px] h-full w-[101%] object-cover z-50 `}
-						src={'https://images.smart.wtf/brainrot.mp4'}
-					/>
 				</Sequence>
 			</AbsoluteFill>
 		</div>
